@@ -8,9 +8,10 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "instance",
-	Short: "PayloadCMS Boilerplate CLI",
-	Long:  `A simple cli tool to help you develop your next PayloadCMS project`,
+	Use:     "instance",
+	Short:   "PayloadCMS Boilerplate CLI",
+	Version: "0.0.2",
+	Long:    `A simple cli tool to help you develop your next PayloadCMS project`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
