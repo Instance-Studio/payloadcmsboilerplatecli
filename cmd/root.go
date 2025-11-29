@@ -10,7 +10,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "instance",
 	Short:   "PayloadCMS Boilerplate CLI",
-	Version: "0.0.2",
+	Version: "0.0.3",
 	Long:    `A simple cli tool to help you develop your next PayloadCMS project`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
