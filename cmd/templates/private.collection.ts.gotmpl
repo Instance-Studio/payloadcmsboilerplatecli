@@ -1,0 +1,43 @@
+import type { CollectionConfig } from 'payload';
+
+export const {{ .PluralCamelCase }}: CollectionConfig = {
+    slug: '{{ .PluralKebabCase }}',
+    trash: true,
+    admin: {
+        useAsTitle: 'title',
+        group: 'CHANGE ME',
+        defaultColumns: ['title', '_status'],
+        hideAPIURL: true,
+    },
+    fields: [
+        {
+            name: 'title',
+            type: 'text',
+        },
+        {
+            name: 'featuredImage',
+            type: 'upload',
+            relationTo: 'media',
+            admin: {
+                position: 'sidebar',
+            },
+        },
+        {
+            type: 'tabs',
+            tabs: [
+                {
+                    label: 'Content',
+                    fields: [],
+                },
+            ],
+        },
+    ],
+    versions: {
+        drafts: {
+            schedulePublish: true,
+            validate: false,
+            autosave: false,
+        },
+        maxPerDoc: 5,
+    },
+};

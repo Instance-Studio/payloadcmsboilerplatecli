@@ -1,0 +1,89 @@
+import type { CollectionConfig } from 'payload';
+import {
+    MetaDescriptionField,
+    MetaImageField,
+    MetaTitleField,
+    OverviewField,
+    PreviewField,
+} from '@payloadcms/plugin-seo/fields';
+import { slugField } from '@/fields/slug';
+import { generatePreviewURLCollections } from '@/lib/collections/preview';
+import { revalidateCollection } from '@/lib/revalidate';
+
+export const {{ .PluralCamelCase }}: CollectionConfig = {
+    slug: '{{ .PluralKebabCase }}',
+    trash: true,
+    admin: {
+        useAsTitle: 'title',
+        preview: generatePreviewURLCollections('{{ .PluralKebabCase }}'),
+        group: 'CHANGE ME',
+        defaultColumns: ['title', '_status'],
+        hideAPIURL: true,
+        enableRichTextLink: true,
+    },
+    fields: [
+        {
+            name: 'title',
+            type: 'text',
+        },
+        ...slugField(),
+        {
+            name: 'featuredImage',
+            type: 'upload',
+            relationTo: 'media',
+            admin: {
+                position: 'sidebar',
+            },
+        },
+        {
+            type: 'tabs',
+            tabs: [
+                {
+                    label: 'Content',
+                    fields: [],
+                },
+                {
+                    label: 'SEO',
+                    name: 'meta',
+                    fields: [
+                        OverviewField({
+                            titlePath: 'meta.title',
+                            descriptionPath: 'meta.description',
+                            imagePath: 'meta.image',
+                        }),
+                        MetaTitleField({
+                            hasGenerateFn: true,
+                        }),
+                        MetaImageField({
+                            hasGenerateFn: true,
+                            relationTo: 'media',
+                        }),
+                        MetaDescriptionField({
+                            hasGenerateFn: true,
+                        }),
+                        PreviewField({
+                            hasGenerateFn: true,
+                            titlePath: 'meta.title',
+                            descriptionPath: 'meta.description',
+                        }),
+                    ],
+                },
+            ],
+        },
+    ],
+    versions: {
+        drafts: {
+            schedulePublish: true,
+            validate: false,
+            autosave: false,
+        },
+        maxPerDoc: 5,
+    },
+    hooks: {
+        afterChange: [
+            ({ collection, doc }) => {
+                revalidateCollection('{{ .PluralKebabCase }}', doc.slug);
+            },
+        ],
+    },
+};
