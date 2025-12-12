@@ -21,7 +21,7 @@ var generateCmd = &cobra.Command{
 		// Give user options for type, name singular, name plural
 		typeMenu := promptui.Select{
 			Label: "Choose an option",
-			Items: []string{"Public Collection", "Private Collection", "Exit"},
+			Items: []string{"Public Collection", "Private Collection", "Global", "Exit"},
 		}
 
 		_, typeResult, err := typeMenu.Run()
@@ -37,6 +37,8 @@ var generateCmd = &cobra.Command{
 		switch typeResult {
 		case "Public Collection", "Private Collection":
 			return collectionGenerate(typeResult)
+		case "Global":
+			return globalGenerate()
 		}
 
 		return nil
@@ -142,9 +144,115 @@ func collectionGenerate(collection string) error {
 	defer f.Close()
 
 	// Populate file with template and data
-	tmpl.Execute(f, data)
+	err = tmpl.Execute(f, data)
+
+	if err != nil {
+		return err
+	}
 
 	fmt.Printf("created file: %s \n", outputFile)
+
+	return nil
+}
+
+func globalGenerate() error {
+	namePrompt := promptui.Prompt{
+		Label: "Name",
+		Validate: func(s string) error {
+			if s == "" {
+				return errors.New("can't be empty")
+			}
+
+			return nil
+		},
+	}
+
+	nameResult, err := namePrompt.Run()
+
+	if err != nil {
+		return err
+	}
+
+	nameCamelCase := strcase.ToCamel(nameResult)
+	namePascalCase := strcase.ToPascal(nameResult)
+	nameKebabCase := strcase.ToKebab(nameResult)
+	nameAllCaps := strcase.ToCase(nameResult, strcase.UpperCase, '_')
+
+	templatePathSettings := filepath.Join("templates", "settings.global.ts.gotmpl")
+	templatePathAPI := filepath.Join("templates", "api.global.ts.gotmpl")
+
+	data := struct {
+		NameCamelCase  string
+		NamePascalCase string
+		NameAllCaps    string
+		NameKebabCase  string
+	}{
+		NameCamelCase:  nameCamelCase,
+		NamePascalCase: namePascalCase,
+		NameAllCaps:    nameAllCaps,
+		NameKebabCase:  nameKebabCase,
+	}
+
+	tmplSettings := template.Must(template.ParseFS(TemplatesFS, templatePathSettings))
+	tmplApi := template.Must(template.ParseFS(TemplatesFS, templatePathAPI))
+
+	fileNameSettings := fmt.Sprintf("%s-config.ts", nameKebabCase)
+	fileNameApi := fmt.Sprintf("%s-api.ts", nameKebabCase)
+
+	outputFolderPath := filepath.Join("src", "globals", nameKebabCase)
+
+	outputFilePathSettings := filepath.Join("src", "globals", nameKebabCase, fileNameSettings)
+	outputFilePathApi := filepath.Join("src", "globals", nameKebabCase, fileNameApi)
+
+	if _, err := os.Stat(outputFilePathSettings); !os.IsNotExist(err) {
+		overrideConfirmPrompt := promptui.Prompt{
+			Label:     "File already exists! Do you want to override it?",
+			IsConfirm: true,
+		}
+
+		_, err := overrideConfirmPrompt.Run()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	err = os.MkdirAll(outputFolderPath, 0700)
+
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Create(outputFilePathSettings)
+
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	f2, err := os.Create(outputFilePathApi)
+
+	if err != nil {
+		return err
+	}
+
+	defer f2.Close()
+
+	// Populate file with template and data
+	err = tmplSettings.Execute(f, data)
+
+	if err != nil {
+		return err
+	}
+
+	err = tmplApi.Execute(f2, data)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("created files in: %s \n", outputFolderPath)
 
 	return nil
 }

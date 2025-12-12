@@ -1,0 +1,33 @@
+import { revalidateTag } from 'next/cache';
+import type { GlobalConfig } from 'payload';
+import { linkField } from '@/fields/link';
+
+export const {{ .NameAllCaps }}_CACHE_KEY = '{{ .NameAllCaps }}';
+
+export const {{ .NameCamelCase }}: GlobalConfig = {
+    slug: '{{ .NameKebabCase }}',
+    label: 'Footer',
+    admin: {
+        hideAPIURL: true,
+    },
+    fields: [
+        {
+            type: 'tabs',
+            tabs: [
+                {
+                    name: 'content',
+                    fields: [
+                        {},
+                    ],
+                },
+            ],
+        },
+    ],
+    hooks: {
+        afterChange: [
+            () => {
+                revalidateTag({{ .NameAllCaps }}_CACHE_KEY);
+            },
+        ],
+    },
+};

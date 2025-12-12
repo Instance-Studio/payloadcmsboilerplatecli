@@ -1,0 +1,29 @@
+import { unstable_cache } from 'next/cache';
+import { draftMode } from 'next/headers';
+import { getPayload } from '@/lib/payload/local-api';
+import { {{.NameAllCaps}}_CACHE_KEY } from './{{.NameKebabCase}}-config';
+
+export const get{{.NamePascalCase}}Global = unstable_cache(
+    async () => {
+        const payload = await getPayload();
+
+        try {
+            const { isEnabled } = await draftMode();
+
+            const {{.NameCamelCase}} = await payload.findGlobal({
+                slug: '{{.NameKebabCase}}',
+                draft: isEnabled,
+            });
+
+            return {{.NameCamelCase}};
+        } catch (err) {
+            payload.logger.error(err);
+
+            return null;
+        }
+    },
+    [],
+    {
+        tags: [{{.NameAllCaps}}],
+    },
+);
