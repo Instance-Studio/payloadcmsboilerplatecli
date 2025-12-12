@@ -1,6 +1,5 @@
 import { revalidateTag } from 'next/cache';
 import type { GlobalConfig } from 'payload';
-import { linkField } from '@/fields/link';
 
 export const {{ .NameAllCaps }}_CACHE_KEY = '{{ .NameAllCaps }}';
 
@@ -16,9 +15,7 @@ export const {{ .NameCamelCase }}: GlobalConfig = {
             tabs: [
                 {
                     name: 'content',
-                    fields: [
-                        {},
-                    ],
+                    fields: [],
                 },
             ],
         },
